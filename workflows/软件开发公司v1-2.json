@@ -1,0 +1,393 @@
+{
+  "name": "软件开发公司v1",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "fd371f0f-6aec-4608-87cd-2bdecd5229ae",
+      "name": "当接收到聊天消息时",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "position": [
+        -736,
+        16
+      ],
+      "webhookId": "823777c8-8858-47cc-8f18-814b70512a4c",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {},
+      "id": "06b43319-2368-4ea8-8e65-9775fdaa482a",
+      "name": "思考",
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "position": [
+        640,
+        576
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "model": "qwen2.5:7b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        576
+      ],
+      "id": "473b9cfd-6c4b-4eca-8c2d-b38eaa835d62",
+      "name": "Ollama聊天模型",
+      "credentials": {
+        "ollamaApi": {
+          "id": "CmjvgiZdYI8HpMIu",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "调用此AI智能体，专注于进行产品模块和功能的分析和研究，帮助公司研发出成功的产品",
+        "text": "={{ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "54f7ac7c-03bf-4a57-99f2-8a4850571f99",
+      "name": "产品经理",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        -512,
+        240
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "toolDescription": "调用此AI智能体，专注于进行项目技术选型，架构设计，并完成项目框架搭建",
+        "text": "={{ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "af8af9e0-f745-4db7-b605-66b766351819",
+      "name": "架构师",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        -224,
+        240
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "toolDescription": "调用此AI智能体，专注于对产品进行项目立项，划分项目阶段，MVP 最小可行性产品研发项目安排，拆分需求等",
+        "text": "={{ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "bbbb798a-a5a8-4cb8-b473-15f34d95eb03",
+      "name": "项目经理",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        72,
+        240
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "toolDescription": "调用此AI智能体，专注于分析项目经理提出的需求，拆分开发任务，帮助研发人员进行技术攻关等",
+        "text": "={{ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "02c51585-2220-46e2-b93a-1ddc243d40c6",
+      "name": "技术经理",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        368,
+        240
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "toolDescription": "调用此AI智能体，专注于进行功能开发，代码编写，初步测试，以及文档编写等",
+        "text": "={{ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "3de19f30-8efe-430e-ae6b-7c4402d679d3",
+      "name": "研发人员",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        656,
+        240
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "toolDescription": "调用此AI智能体，专注于对功能进行端到端测试，发现问题，并反馈给研发人员",
+        "text": "={{ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "665d6c25-9745-442b-84d4-5e389dc3a694",
+      "name": "测试人员",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        944,
+        240
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "14513ba7-273a-4e23-a5ad-a57b420fc74c",
+      "name": "研发部门主管智能体",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -192,
+        16
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "content": "研发一款简单的像素地下城单机 pc 游戏，游戏开发语言为 python",
+        "height": 80
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -832,
+        224
+      ],
+      "typeVersion": 1,
+      "id": "9d6d5cd8-770b-44a6-9f85-cb67cba992b5",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 50
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        160,
+        576
+      ],
+      "id": "24fcd272-beab-4820-b94c-5f57d478ca77",
+      "name": "Simple Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "当接收到聊天消息时": {
+      "main": [
+        [
+          {
+            "node": "研发部门主管智能体",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama聊天模型": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "测试人员",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "研发人员",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "技术经理",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "项目经理",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "架构师",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "研发部门主管智能体",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "产品经理",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "思考": {
+      "ai_tool": [
+        [
+          {
+            "node": "研发部门主管智能体",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "项目经理",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "产品经理",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "架构师",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "技术经理",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "研发人员",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "测试人员",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "产品经理": {
+      "ai_tool": [
+        [
+          {
+            "node": "研发部门主管智能体",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "架构师": {
+      "ai_tool": [
+        [
+          {
+            "node": "研发部门主管智能体",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "项目经理": {
+      "ai_tool": [
+        [
+          {
+            "node": "研发部门主管智能体",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "技术经理": {
+      "ai_tool": [
+        [
+          {
+            "node": "研发部门主管智能体",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "研发人员": {
+      "ai_tool": [
+        [
+          {
+            "node": "研发部门主管智能体",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "测试人员": {
+      "ai_tool": [
+        [
+          {
+            "node": "研发部门主管智能体",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "研发部门主管智能体",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "产品经理",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "架构师",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "项目经理",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "技术经理",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "研发人员",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "测试人员",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "3098d880-392b-4f60-97e7-62ebcd3394c8",
+  "meta": {
+    "instanceId": "1a78272c2439a7675eadcd563b0689769ea02281bea64a701b476f505db425fd"
+  },
+  "id": "GyXiExcFpkEIf2re",
+  "tags": []
+}
