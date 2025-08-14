@@ -1,0 +1,520 @@
+{
+  "name": "多轮对话",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=产品: {{$json[\"productDescription\"]}}",
+        "options": {
+          "systemMessage": "你是一个创意品牌代理。根据这个产品描述，生成3个不同的名称+标语组合。\n\n返回格式如下：\n[\n  { \"name\": \"名称1\", \"tagline\": \"标语1\" },\n  { \"name\": \"名称2\", \"tagline\": \"标语2\" },\n  { \"name\": \"名称3\", \"tagline\": \"标语3\" }\n]\n"
+        }
+      },
+      "id": "a00de47b-6912-4890-bc08-58c809b790af",
+      "name": "AI代理",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        1168,
+        128
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": true
+        }
+      },
+      "id": "166f8d78-8284-417f-b28f-bf81b0ce4e6e",
+      "name": "循环处理项",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        1568,
+        128
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "or",
+          "conditions": [
+            {
+              "id": "595ebd64-59de-470c-9827-24d204db58f9",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.turn }}",
+              "rightValue": 5
+            },
+            {
+              "id": "fb2ec186-4676-4e91-85b1-af7ce745b203",
+              "operator": {
+                "name": "filter.operator.equals",
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.done }}",
+              "rightValue": "是"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f283d1e2-5f6d-4b6c-849e-53e934884d87",
+      "name": "条件判断",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        1984,
+        240
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=创意方案:\n{{JSON.stringify($('编辑字段').item.json.ideas)}}",
+        "options": {
+          "systemMessage": "你是一个专业的品牌分析师。请为以下每个名称+标语组合提供简短的缺陷分析和改进建议。"
+        }
+      },
+      "id": "0ac9e3a7-8a8d-433e-84f1-b45fec9dc5e6",
+      "name": "批评代理",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        2224,
+        304
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=**原始创意:** {{ JSON.stringify($('编辑字段').item.json.ideas) }}\n\n**批评反馈:** {{ $json.output }}",
+        "options": {
+          "systemMessage": "你是一个优化师。根据原始创意和批评反馈，创建3个改进后的名称+标语组合。\n\n要求简洁、巧妙且富有冲击力。\n\n返回格式如下：\n[\n  { \"name\": \"名称1\", \"tagline\": \"标语1\" },\n  { \"name\": \"名称2\", \"tagline\": \"标语2\" },\n  { \"name\": \"名称3\", \"tagline\": \"标语3\" }\n]\n"
+        }
+      },
+      "id": "b165bd09-ed8e-47bc-826d-ab4a4ba63658",
+      "name": "优化代理",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        2656,
+        400
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1c6c6fc2-96de-469a-b30f-7ffae52c9847",
+              "name": "ideas",
+              "type": "array",
+              "value": "={{ $json.output }}"
+            },
+            {
+              "id": "1a857aee-ae3f-4e81-a09c-a9e83edd9b98",
+              "name": "turn",
+              "type": "number",
+              "value": "={{ $json.turn || 1}}"
+            },
+            {
+              "id": "d310985b-59a3-44b8-aa5a-e77f2b352ae4",
+              "name": "done",
+              "type": "string",
+              "value": "={{ $json.done || \"否\"}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a95b4f5b-5dcd-4633-a241-05ef505118c6",
+      "name": "编辑字段",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1776,
+        240
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "jsCode": "const ideas = $json.output.ideas || [];\nconst currentTurn = $json.output.turn ?? 0;\nconst currentDone = $json.output.done || \"否\";\n\nconst nextTurn = currentTurn + 1;\n\nreturn [\n  {\n    json: {\n      ideas,\n      turn: nextTurn,\n      done: currentDone\n    }\n  }\n];\n"
+      },
+      "id": "b89dd4eb-56b6-4c28-86c9-dc1f749c4750",
+      "name": "代码",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        3520,
+        768
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "21a77915-3d73-450d-bc9c-f655471a3b56",
+              "name": "output",
+              "type": "array",
+              "value": "={{ $json.ideas }}"
+            },
+            {
+              "id": "6dee88ae-c3f3-464a-a3cc-179bd28b7c5e",
+              "name": "turn",
+              "type": "number",
+              "value": "={{ $json.turn }}"
+            },
+            {
+              "id": "2f2caa57-797c-4fa3-9126-da46777a2b63",
+              "name": "done",
+              "type": "string",
+              "value": "={{ $json.done }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bfa0c52e-283e-40d5-a7f1-f1cce9ff5128",
+      "name": "编辑字段1",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        3744,
+        768
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"ideas\": [\n      { \"name\": \"企业智脑\", \"tagline\": \"利用AI将您的商业创意转化为现实。\" },\n      { \"name\": \"创新逻辑\", \"tagline\": \"通过AI驱动的日志记录捕捉和发展您的创业想法。\" },\n      { \"name\": \"创业脚本\", \"tagline\": \"通过智能AI日志记录加速您的创业旅程。\" }],\n  \"done\": \"是\",\n  \"turn\": 2\n}"
+      },
+      "id": "e87b82c4-4bae-4072-a425-bdf421185e21",
+      "name": "结构化输出解析器",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        3216,
+        704
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {},
+      "id": "6bbbbfa1-f88b-470f-a53a-9d0ee333e428",
+      "name": "当点击'执行工作流'时",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        736,
+        128
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "# ⚙️ 设置指南\n## 这是一个可供用户定制的工作流\n### 🧑‍💻 作者: [Sebastian/OptiLever](www.linkedin.com/in/sebastian-9ab9b9242)\n\n### 🚀 前提条件:\n\n**1. 连接到Openai API账户。**\n\n\n---\n\n### 🚀 连接步骤:\n\n\n1. **编辑字段节点设置(初始)**\n- 定位工作流开头的**\"编辑字段\"**节点\n- **编辑以下字段:**\n- 确保输入字段**\"ideas\"**设置为数组\n- 添加字段**\"turn\"**用于跟踪循环迭代次数(默认值:1)\n- 添加字段**\"done\"**用于跟踪评估是否完成(默认值:否)\n\n\n\n2. **批评代理设置**\n- 配置**\"批评代理\"**节点分析输入并提供反馈\n- 确保输出结构包含改进建议\n\n\n\n3. **优化代理设置**\n- 配置**\"优化代理\"**节点使用原始输入和批评反馈\n- 确保输出是输入的改进版本(例如三个改进后的名称和标语)\n\n\n\n4. **评估代理设置**\n- 配置**\"评估代理\"**节点对优化后的输出进行排名\n- 确保输出包含**\"done\"**字段指示结果是否令人满意\n\n\n\n5. **编辑字段节点设置(最终)**\n- 确保最终的**\"编辑字段\"**节点与初始输入结构匹配\n- 这确保循环能在每次迭代中正确处理数据\n\n\n\n6. **条件判断节点设置**\n- 配置**\"条件判断\"**节点检查**\"turn\"**是否超过阈值(例如5)或**\"done\"**是否为真\n- 如果为真，则退出循环并继续工作流下一步\n\n\n\n7. **可选: 额外AI代理**\n- 在循环后添加额外的AI代理以进一步处理最终输出\n\n\n---\n\n\n",
+        "height": 1160,
+        "width": 3920,
+        "color": 5
+      },
+      "id": "fc71442b-56ff-4482-91b2-b2608448a13e",
+      "name": "便签",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=**待检查结果:** {{ $json.output }}\n\n**循环轮次:** {{ $('编辑字段').item.json.turn }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "你是一个评估者。对3个改进后的名称和标语进行排名。判断这些名称和标语是否足够出色，能让人想要从该公司购买产品，或者需要进一步改进(是/否)。输出符合以下格式的JSON：\n{\n\t\"ideas\": [\n      { \"name\": \"企业智脑\", \"tagline\": \"利用AI将您的商业创意转化为现实。\" },\n      { \"name\": \"创新逻辑\", \"tagline\": \"通过AI驱动的日志记录捕捉和发展您的创业想法。\" },\n      { \"name\": \"创业脚本\", \"tagline\": \"通过智能AI日志记录加速您的创业旅程。\" }],\n  \"done\": \"是\",\n  \"turn\": 2\n}"
+        }
+      },
+      "id": "71328f01-30a0-42f8-a59c-b500ccb654b8",
+      "name": "评估代理",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        3040,
+        528
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "model": "qwen2.5:7b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        1216,
+        416
+      ],
+      "id": "6f2cff15-2ae5-4482-a5ef-29987ffb00ee",
+      "name": "Ollama聊天模型",
+      "credentials": {
+        "ollamaApi": {
+          "id": "CmjvgiZdYI8HpMIu",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        736,
+        304
+      ],
+      "id": "273f7514-151d-4f43-832a-7a953cbc0942",
+      "name": "当收到聊天消息时",
+      "webhookId": "4110e0b5-7f92-4b9b-b89c-3126e8d112ae"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "289341ff-0f9b-4dd7-8e77-756d1a2aaa59",
+              "name": "productDescription",
+              "value": "={{ $json.chatInput }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        944,
+        304
+      ],
+      "id": "d2cfc9f4-a678-45ca-aab4-0b7d01dde069",
+      "name": "编辑字段2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 循环处理输入项并为每个JSON添加一个名为'myNewField'的新字段\nfor (const item of $input.all()) {\n  item.json.productDescription = \"随便想点什么好玩的产品描述\";\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        944,
+        128
+      ],
+      "id": "d92ea557-1199-4574-9a82-4dedd8f52eb6",
+      "name": "代码1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "条件判断": {
+      "main": [
+        [],
+        [
+          {
+            "node": "批评代理",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "代码": {
+      "main": [
+        [
+          {
+            "node": "编辑字段1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI代理": {
+      "main": [
+        [
+          {
+            "node": "循环处理项",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "编辑字段": {
+      "main": [
+        [
+          {
+            "node": "条件判断",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "批评代理": {
+      "main": [
+        [
+          {
+            "node": "优化代理",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "编辑字段1": {
+      "main": [
+        [
+          {
+            "node": "循环处理项",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "优化代理": {
+      "main": [
+        [
+          {
+            "node": "评估代理",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "循环处理项": {
+      "main": [
+        [],
+        [
+          {
+            "node": "编辑字段",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "评估代理": {
+      "main": [
+        [
+          {
+            "node": "代码",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "结构化输出解析器": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "评估代理",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "当点击'执行工作流'时": {
+      "main": [
+        [
+          {
+            "node": "代码1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama聊天模型": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI代理",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "批评代理",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "优化代理",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "评估代理",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "当收到聊天消息时": {
+      "main": [
+        [
+          {
+            "node": "编辑字段2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "编辑字段2": {
+      "main": [
+        [
+          {
+            "node": "AI代理",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "代码1": {
+      "main": [
+        [
+          {
+            "node": "AI代理",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f0585997-9aef-42d1-b7e0-219af0a0b8df",
+  "meta": {
+    "instanceId": "1a78272c2439a7675eadcd563b0689769ea02281bea64a701b476f505db425fd"
+  },
+  "id": "Pj4F52PA4dfneU4Y",
+  "tags": []
+}

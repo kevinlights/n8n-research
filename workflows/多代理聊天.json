@@ -1,0 +1,476 @@
+{
+  "name": "多代理聊天",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "95db58b5-53e4-4690-b898-e3b824b3e1b8",
+      "name": "当收到聊天消息时",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "position": [
+        -352,
+        704
+      ],
+      "webhookId": "a74752f3-419a-4510-856f-3efeaceec019",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "=当前日期是 {{ $now.format('yyyy-MM-dd') }}。当前时间是 {{ $now.format('HH:MM:ss') }}。\n\n用户是 {{ $('定义全局设置').item.json.user.name }}，位于 {{ $('定义全局设置').item.json.user.location }}。{{ $('定义全局设置').item.json.user.notes }}\n\n您正在与用户和多个AI助手进行对话：{{ $('定义智能体设置').item.json.keys() }}\n\n您是 {{ $('首次循环？').item.json.name }}。\n\n{{ $('循环处理项').item.json.systemMessage }}\n\n{{ $('定义全局设置').item.json.global.systemMessage }}"
+        }
+      },
+      "id": "9b5c7404-d93b-4172-aabf-f0bd71d47398",
+      "name": "AI智能体",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        1184,
+        704
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "91e9994b-b12c-48f7-9d4f-d7f9b04e05cc",
+      "name": "循环处理项",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        528,
+        704
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "jsCode": "// 分析用户消息并按出现顺序提取@提及。如果没有提及，将随机调用所有助手。\n// --- 配置：调整以下行 ---\nconst chatMessageNodeName = '当收到聊天消息时'; // <-- 替换为您的聊天消息节点名称\nconst agentSetupNodeName = '定义智能体设置';         // <-- 替换为您的智能体设置节点名称\nconst chatTextPath = 'json.chatInput';               // <-- 替换为聊天节点输出中的文本路径（例如'json.message'）\n// --- 结束配置 ---\n\n// 辅助函数，用于安全地访问嵌套属性（替代_.get）\nfunction getSafe(obj, path, defaultValue = undefined) {\n    const pathParts = path.split('.');\n    let current = obj;\n    for (const part of pathParts) {\n        if (current === null || current === undefined || typeof current !== 'object' || !Object.prototype.hasOwnProperty.call(current, part)) {\n            return defaultValue;\n        }\n        current = current[part];\n    }\n    return current ?? defaultValue;\n}\n\n// 1. 获取聊天文本\nconst chatMessageNode = $(chatMessageNodeName);\nconst chatText = getSafe(chatMessageNode.item, chatTextPath, '');\n\n// 2. 获取智能体数据和名称\nconst agentSetupNode = $(agentSetupNodeName);\nconst agentData = getSafe(agentSetupNode.item, 'json', {}); // 例如：{ Chad: {...}, Gemma: {...}, Claude: {...} }\nconst agentNames = Object.keys(agentData);\n\n// 3. 查找所有提及、它们的名称及其在文本中的位置\nconst foundMentions = [];\nif (chatText && agentNames.length > 0) {\n    const escapeRegex = (s) => s.replace(/[-\\/\\\\^$*+?.()|[\\]{}]/g, '\\\\$&');\n    const agentPatternPart = agentNames.map(escapeRegex).join('|');\n\n    if (agentPatternPart) {\n        const mentionPattern = new RegExp(`\\\\B@(${agentPatternPart})\\\\b`, 'gi');\n        const matches = chatText.matchAll(mentionPattern);\n\n        for (const match of matches) {\n            const matchedNameCaseInsensitive = match[1];\n            const matchIndex = match.index;\n            const canonicalName = agentNames.find(name => name.toLowerCase() === matchedNameCaseInsensitive.toLowerCase());\n            if (canonicalName) {\n                foundMentions.push({ name: canonicalName, index: matchIndex });\n            }\n        }\n    }\n}\n\n// 4. 按索引（出现顺序）对找到的提及进行排序\nfoundMentions.sort((a, b) => a.index - b.index);\n\n// 5. 将排序后的提及映射到所需的输出格式（智能体详情对象数组）\nlet outputArray = foundMentions.map(mention => {\n    const agentDetails = agentData[mention.name];\n    if (!agentDetails) {\n        console.warn(`找不到智能体的详细信息：${mention.name}`);\n        return null;\n    }\n    return {\n        name: agentDetails.name,\n        model: agentDetails.model,\n        systemMessage: agentDetails.systemMessage\n    };\n}).filter(item => item !== null);\n\n// 6. 检查是否找到特定提及。如果没有，用所有智能体（随机顺序）填充outputArray。\nif (outputArray.length === 0 && foundMentions.length === 0) { // 检查最初是否没有找到提及\n    // --- 未找到提及 ---\n    // 用agentData中的所有智能体填充outputArray\n    const allAgentDetailsArray = Object.values(agentData);\n\n    // --- 简单随机化 ---\n    // 使用随机比较器对数组进行原地排序\n    allAgentDetailsArray.sort(() => 0.5 - Math.random());\n    // --- 结束随机化 ---\n\n    // 将所有智能体（现在是随机顺序）映射到输出结构\n    outputArray = allAgentDetailsArray.map(agentObject => ({\n        name: agentObject.name,\n        model: agentObject.model,\n        systemMessage: agentObject.systemMessage\n    }));\n} // 故意不加'else'，如果outputArray已经有提及项，我们就使用它。\n\n// 7. 最终输出格式化（处理两种情况：特定提及或所有智能体）\n// 检查经过所有处理后，outputArray是否仍然为空（例如，如果最初agentData为空）\nif (outputArray.length === 0) {\n    // 如果仍然为空，返回状态或错误作为后备\n     return [{ json: { status: \"无可用智能体\", message: \"未找到提及且未定义智能体。\" } }];\n} else {\n    // 返回为n8n格式化的智能体对象数组（多个项）\n    return outputArray.map(agentObject => ({ json: agentObject }));\n}"
+      },
+      "id": "9f8a0497-3c13-4407-82d7-b6f34263a7d5",
+      "name": "提取提及",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        304,
+        704
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('当收到聊天消息时').first().json.sessionId }}",
+        "contextWindowLength": 99
+      },
+      "id": "c0cc92f2-60bb-4a57-838e-e377d6887a57",
+      "name": "简单记忆",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        1344,
+        928
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "38aa959a-e1e5-4c84-a7bd-ff5e0f61b62d",
+              "name": "=chatInput",
+              "type": "string",
+              "value": "={{ $('设置最后助手消息').first().json.lastAssistantMessage }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "76a4e3c4-674b-4493-8910-b5d6ad534e0f",
+      "name": "将最后助手消息设为输入",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        976,
+        800
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "75b61275-7526-4431-b624-f8e098aa812d",
+              "name": "chatInput",
+              "type": "string",
+              "value": "={{ $('当收到聊天消息时').item.json.chatInput }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "95f58ad3-aaf4-4118-9a9f-3e57aca3f99f",
+      "name": "将用户消息设为输入",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        976,
+        608
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "51c41fdf-f4d3-4c7a-ac18-06815a59a958",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $runIndex}}",
+              "rightValue": 0
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "84b1140a-2b98-4ac7-a96e-c603411af026",
+      "name": "首次循环？",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        752,
+        704
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b93025b2-f5a7-476b-bd09-b5b4af050e73",
+              "name": "lastAssistantMessage",
+              "type": "string",
+              "value": "=**{{ $('循环处理项').item.json.name }}**:\n\n{{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e233f7aa-459c-46cd-bd69-44f002dedd57",
+      "name": "设置最后助手消息",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1568,
+        832
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "jsCode": "// 从输入中获取项数组（循环的输出）\nconst inputItems = items;\n\n// 从每个项的JSON数据中提取'lastAssistantMessage'。\n// 如果字段缺失或不是字符串，则使用空字符串以避免错误。\nconst messages = inputItems.map(item => {\n  const message = item.json.lastAssistantMessage;\n  return typeof message === 'string' ? message : '';\n});\n\n// 用水平分隔符将提取的消息连接起来\nconst combinedText = messages.join('\\n\\n---\\n\\n');\n\n// 返回包含组合文本的新单项。\n// 您可以重命名'output'。\nreturn [{ json: { output: combinedText } }];"
+      },
+      "id": "e6e48c84-420c-4b88-abe3-0b536a741d49",
+      "name": "合并并格式化响应",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        752,
+        512
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "// 配置全局设置。这包括关于您（用户）的信息，以及所有助手都会看到的系统消息部分。（助手特定的系统消息部分可以在'定义智能体设置'节点中设置。）\nreturn [\n  {\n    json: {\n      \"user\": {\n        \"name\": \"张三\",\n        \"location\": \"中国北京\",\n        \"notes\": \"张三喜欢随意、非正式的对话风格。\"\n      },\n      \"global\": {\n        \"systemMessage\": \"不要过度表现乐于助人和随和的态度。\"\n      }\n    }\n  }\n];\n"
+      },
+      "id": "c2ecd5a2-b1a5-4f6a-993f-c7145d8ddd11",
+      "name": "定义全局设置",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -128,
+        704
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "// 配置助手。可以通过添加或删除JSON对象来更改助手数量。使用OpenRouter模型命名约定。\nreturn [\n  {\n    json: {\n      \"小明\": {\n        \"name\": \"小明\",\n        \"model\": \"openai/gpt-4o\",\n        \"systemMessage\": \"你是一个乐于助人的助手。你富有创意且行为古怪，喜欢将讨论引向意想不到的方向。\"\n      },\n      \"小红\": {\n        \"name\": \"小红\",\n        \"model\": \"anthropic/claude-3.7-sonnet\",\n        \"systemMessage\": \"你逻辑性强且务实。\"\n      },\n      \"小刚\": {\n        \"name\": \"小刚\",\n        \"model\": \"google/gemini-2.0-flash-lite-001\",\n        \"systemMessage\": \"你非常友好且喜欢辩论。\"\n      }\n    }\n  }\n];\n"
+      },
+      "id": "aa98d685-0311-406c-ba72-4c7eff2ab970",
+      "name": "定义智能体设置",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        96,
+        704
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "content": "## 第一步：配置设置节点\n\n编辑这些节点中的JSON以：\n\n- 配置关于您（用户）的详细信息\n- 定义将出现在所有系统消息中的内容\n- 定义智能体。\n\n对于智能体，您可以配置：\n- 创建的数量\n- 它们的名称\n- 使用的LLM模型（选择OpenRouter上可用的任何模型）\n- 智能体特定的系统提示内容",
+        "height": 500,
+        "width": 500,
+        "color": 4
+      },
+      "id": "8bcaf1b1-c141-4c31-ae97-8c7d124982eb",
+      "name": "便签",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -224,
+        368
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 第二步：将智能体连接到OpenRouter\n\n设置您的OpenRouter凭据，所有其他参数（包括系统消息和模型选择）将动态填充。",
+        "height": 720,
+        "width": 360,
+        "color": 4
+      },
+      "id": "5538833c-ff11-4ae8-822d-b8b772adf858",
+      "name": "便签1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1136,
+        368
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "# 可扩展的多智能体对话\n\n",
+        "height": 1100,
+        "width": 2180,
+        "color": 5
+      },
+      "id": "818f6977-15d5-4dd1-a233-3425a707b954",
+      "name": "便签2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -416,
+        80
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 关于此工作流\n\n**此工作流有什么功能？**\n使您能够同时与多个AI智能体发起对话。每个智能体可以配置独特的名称、系统指令和不同的模型。\n\n**如何使用？**\n1. 配置设置节点以创建所需的智能体。\n2. 在消息中使用@名称提及来调用一个或多个特定的智能体。如果消息中没有@提及，将随机调用所有智能体。",
+        "height": 360,
+        "width": 380
+      },
+      "id": "34db3cc3-db88-42b1-83ba-7ead7db71703",
+      "name": "便签3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        336,
+        128
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "**工作原理是什么？**\n设置在前两个节点（聊天触发器之后）中配置。然后提取消息中的@提及并输入到循环中。每次循环时，智能体的系统消息和模型都会动态填充，避免了创建多个智能体节点和复杂的路由逻辑。\n\n当所有智能体都完成响应后，它们的响应会被合并并格式化。共享记忆节点的使用支持多轮对话。\n\n**有哪些限制？**\n智能体不能互相调用或并行响应。在所有智能体完成响应之前，用户看不到智能体的响应。\n\n",
+        "height": 360,
+        "width": 380
+      },
+      "id": "c0b8ba32-a2cd-46a7-b833-97d6c84a5199",
+      "name": "便签4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        704,
+        128
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "model": "qwen2.5:7b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        1168,
+        912
+      ],
+      "id": "4f1c447e-fff8-4e18-ae79-3c3ef8a67141",
+      "name": "Ollama聊天模型",
+      "credentials": {
+        "ollamaApi": {
+          "id": "CmjvgiZdYI8HpMIu",
+          "name": "Ollama account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "AI智能体": {
+      "main": [
+        [
+          {
+            "node": "设置最后助手消息",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "首次循环？": {
+      "main": [
+        [
+          {
+            "node": "将用户消息设为输入",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "将最后助手消息设为输入",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "简单记忆": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI智能体",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "循环处理项": {
+      "main": [
+        [
+          {
+            "node": "合并并格式化响应",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "首次循环？",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "提取提及": {
+      "main": [
+        [
+          {
+            "node": "循环处理项",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "定义智能体设置": {
+      "main": [
+        [
+          {
+            "node": "提取提及",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "定义全局设置": {
+      "main": [
+        [
+          {
+            "node": "定义智能体设置",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "设置最后助手消息": {
+      "main": [
+        [
+          {
+            "node": "循环处理项",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "将用户消息设为输入": {
+      "main": [
+        [
+          {
+            "node": "AI智能体",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "当收到聊天消息时": {
+      "main": [
+        [
+          {
+            "node": "定义全局设置",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "将最后助手消息设为输入": {
+      "main": [
+        [
+          {
+            "node": "AI智能体",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama聊天模型": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI智能体",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f41a9217-edc5-452a-9c8c-ef68a791e6e8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1a78272c2439a7675eadcd563b0689769ea02281bea64a701b476f505db425fd"
+  },
+  "id": "Qf6CyIkntzuon9II",
+  "tags": []
+}
