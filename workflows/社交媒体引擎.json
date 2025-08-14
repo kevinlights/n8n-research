@@ -1,0 +1,327 @@
+{
+  "name": "社交媒体引擎",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "4140cfbd-7c29-4a52-bb60-83e11c74d3d6",
+      "name": "当接收到聊天消息时",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "position": [
+        -736,
+        16
+      ],
+      "webhookId": "social-webhook-id",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "08f5dc7f-bd7c-4c3d-9e11-b3578be4b10d",
+      "name": "社交媒体总监智能体",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        56,
+        16
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {},
+      "id": "c26a985b-44dc-4d93-9a5f-5158dc344cc5",
+      "name": "思考",
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "position": [
+        -512,
+        240
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "toolDescription": "调用此AI智能体，专注于Instagram内容创作、视觉叙事、标签策略和Instagram故事/Reels优化",
+        "text": "={{ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "3dbfc15f-b855-46a6-a8af-f9074e538a87",
+      "name": "Instagram内容创作者",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        1056,
+        240
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "toolDescription": "调用此AI智能体，专注于Twitter/X内容策略、热门话题、病毒式内容创作和Twitter互动策略",
+        "text": "={{ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "36f9aa37-84fa-478a-8936-3193202c09b0",
+      "name": "Twitter/X策略师",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        192,
+        240
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "toolDescription": "调用此AI智能体，专注于Facebook社区管理、群组互动、Facebook广告优化和受众构建",
+        "text": "={{ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "041607af-31fb-491d-a6ca-55a573b11863",
+      "name": "Facebook社区经理",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        768,
+        240
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "toolDescription": "调用此AI智能体，专注于TikTok视频概念、病毒趋势、短视频内容和TikTok算法优化",
+        "text": "={{ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "f327853b-0949-4a25-a7d8-00571c7ec264",
+      "name": "TikTok视频创作者",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        480,
+        240
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "toolDescription": "调用此AI智能体，专注于YouTube内容规划、视频SEO、缩略图优化和YouTube频道增长策略",
+        "text": "={{ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "4298f1d0-7f7a-4bea-abd7-26c01c7b5020",
+      "name": "YouTube内容策划师",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        -384,
+        240
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "toolDescription": "调用此AI智能体，专注于社交媒体分析、性能跟踪、受众洞察和跨平台报告",
+        "text": "={{ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "b1bca9c2-c6d4-46ae-9e72-25c6569957a0",
+      "name": "社交媒体分析专家",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        -96,
+        240
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "content": "=======================================\n        社交媒体总监与团队\n=======================================\n如有任何问题或支持，请联系:\n    Yaron@nofluff.online\n\n探索更多技巧和教程:\n   - YouTube: https://www.youtube.com/@YaronBeen/videos\n   - LinkedIn: https://www.linkedin.com/in/yaronbeen/\n=======================================",
+        "height": 320,
+        "width": 580,
+        "color": 5
+      },
+      "id": "f458e7e0-50a4-4e55-8ec0-4434c7c4b122",
+      "name": "便签标题",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1856,
+        80
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 📱 **社交媒体总监与团队 - AI工作流**\n\n**🔥 由OpenAI O3和GPT-4.1-mini多智能体系统驱动**\n\n#社交媒体 #内容创作 #n8n工作流 #OpenAI #数字营销\n\n---\n\n### 📝 **概述**\n\n此多智能体n8n自动化创建了一个全面的社交媒体引擎。一个战略性的社交媒体总监智能体接收您的内容请求，分析平台机会，并协调Instagram、Twitter/X、Facebook、TikTok、YouTube和分析专家智能体，在所有主要社交平台上提供引人入胜的内容，实现最大覆盖和互动。\n\n---\n\n### ⚙️ **工作原理**\n\n1. **聊天触发器**接收社交媒体请求（例如，“为我们的新产品发布创建一个病毒式营销活动”）\n2. **社交媒体总监**（O3）分析平台环境并确定内容策略\n3. 委托给专家智能体：\n   - Instagram内容创作者\n   - Twitter/X策略师\n   - Facebook社区经理\n   - TikTok视频创作者\n   - YouTube内容策划师\n   - 社交媒体分析专家\n4. 每个智能体使用**GPT-4.1-mini**进行专业内容创作\n5. 结果整合为全面的社交媒体活动\n\n---\n\n### 👥 **认识您的AI社交媒体团队**\n\n| 智能体 | 用途 | 模型 | 输出 |\n|-------|---------|-------|--------|\n| 📱 **社交媒体总监** | 策略与活动协调 | O3 | 战略性社交媒体领导 |\n| 📸 **Instagram创作者** | 视觉内容、故事、Reels | GPT-4.1-mini | Instagram内容 |\n| 🐦 **Twitter/X策略师** | 病毒式推文、热门话题 | GPT-4.1-mini | Twitter活动 |\n| 👥 **Facebook经理** | 社区建设、互动 | GPT-4.1-mini | Facebook策略 |\n| 🎵 **TikTok创作者** | 短视频概念 | GPT-4.1-mini | TikTok内容 |\n| 🎬 **YouTube策划师** | 长视频策略 | GPT-4.1-mini | YouTube活动 |\n| 📊 **分析专家** | 性能跟踪、洞察 | GPT-4.1-mini | 社交媒体分析 |\n\n---\n\n### 💡 **使用场景**\n\n- **病毒式活动**：多平台内容策略实现最大覆盖\n- **产品发布**：跨所有平台的协调社交媒体活动\n- **品牌认知**：跨平台的一致消息和视觉标识\n- **社区建设**：互动策略和受众增长技巧\n- **内容日历**：自动化内容规划和调度优化\n- **危机管理**：品牌保护的快速响应策略\n\n---\n\n### 💸 **成本优化**\n\n- **O3用于社交媒体总监**：仅用于战略性社交媒体决策\n- **GPT-4.1-mini用于专家**：成本降低90%\n- **并行处理**：同时处理所有平台\n- **内容再利用**：一个策略适应多个平台\n\n---\n\n### 🏷️ **标签**\n\n#Instagram #TwitterX #Facebook #TikTok #YouTube #社交媒体分析\n#内容策略 #病毒营销 #社交互动 #品牌认知 #网红营销\n#n8n #OpenAI #多智能体系统 #社交自动化 #数字营销 #内容创作",
+        "height": 2500,
+        "width": 740,
+        "color": 5
+      },
+      "id": "0030eef8-9971-4689-b4db-2faf0655a6ea",
+      "name": "便签主要内容",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1856,
+        416
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "model": "qwen2.5:7b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        272,
+        448
+      ],
+      "id": "ac417797-dab7-4d8c-8d81-1e0a3754714f",
+      "name": "Ollama聊天模型",
+      "credentials": {
+        "ollamaApi": {
+          "id": "CmjvgiZdYI8HpMIu",
+          "name": "Ollama account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "当接收到聊天消息时": {
+      "main": [
+        [
+          {
+            "node": "社交媒体总监智能体",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama聊天模型": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Instagram内容创作者",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Facebook社区经理",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "TikTok视频创作者",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Twitter/X策略师",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "社交媒体分析专家",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "YouTube内容策划师",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "社交媒体总监智能体",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "思考": {
+      "ai_tool": [
+        [
+          {
+            "node": "社交媒体总监智能体",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "YouTube内容策划师": {
+      "ai_tool": [
+        [
+          {
+            "node": "社交媒体总监智能体",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "社交媒体分析专家": {
+      "ai_tool": [
+        [
+          {
+            "node": "社交媒体总监智能体",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Twitter/X策略师": {
+      "ai_tool": [
+        [
+          {
+            "node": "社交媒体总监智能体",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TikTok视频创作者": {
+      "ai_tool": [
+        [
+          {
+            "node": "社交媒体总监智能体",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Facebook社区经理": {
+      "ai_tool": [
+        [
+          {
+            "node": "社交媒体总监智能体",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Instagram内容创作者": {
+      "ai_tool": [
+        [
+          {
+            "node": "社交媒体总监智能体",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "61d60007-539c-43e9-9326-77d99f3be27a",
+  "meta": {
+    "instanceId": "1a78272c2439a7675eadcd563b0689769ea02281bea64a701b476f505db425fd"
+  },
+  "id": "xFumEvdZ0Z1YN5FN",
+  "tags": []
+}

@@ -1,0 +1,323 @@
+{
+  "name": "Amplify Social Media Presence with O3 and GPT-4 Multi-Agent Team",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "social-chat-trigger",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "position": [
+        1488,
+        288
+      ],
+      "webhookId": "social-webhook-id",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "social-director-agent",
+      "name": "Social Media Director Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        1776,
+        288
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {},
+      "id": "social-think",
+      "name": "Think",
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "position": [
+        2064,
+        432
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "toolDescription": "call this AI Agent that specializes in Instagram content creation, visual storytelling, hashtag strategies, and Instagram Stories/Reels optimization",
+        "text": "={{ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "instagram-agent",
+      "name": "Instagram Content Creator",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        1824,
+        912
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "toolDescription": "call this AI Agent that specializes in Twitter/X content strategy, trending topics, viral content creation, and Twitter engagement tactics",
+        "text": "={{ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "twitter-agent",
+      "name": "Twitter/X Strategist",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        2736,
+        576
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "toolDescription": "call this AI Agent that specializes in Facebook community management, group engagement, Facebook ads optimization, and audience building",
+        "text": "={{ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "facebook-agent",
+      "name": "Facebook Community Manager",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        2240,
+        1008
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "toolDescription": "call this AI Agent that specializes in TikTok video concepts, viral trends, short-form video content, and TikTok algorithm optimization",
+        "text": "={{ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "tiktok-agent",
+      "name": "TikTok Video Creator",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        2544,
+        816
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "toolDescription": "call this AI Agent that specializes in YouTube content planning, video SEO, thumbnail optimization, and YouTube channel growth strategies",
+        "text": "={{ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "youtube-agent",
+      "name": "YouTube Content Planner",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        2224,
+        160
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "toolDescription": "call this AI Agent that specializes in social media analytics, performance tracking, audience insights, and cross-platform reporting",
+        "text": "={{ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "analytics-agent",
+      "name": "Social Media Analytics Specialist",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        2624,
+        176
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "content": "=======================================\n        SOCIAL MEDIA DIRECTOR WITH TEAM\n=======================================\nFor any questions or support, please contact:\n    Yaron@nofluff.online\n\nExplore more tips and tutorials here:\n   - YouTube: https://www.youtube.com/@YaronBeen/videos\n   - LinkedIn: https://www.linkedin.com/in/yaronbeen/\n=======================================",
+        "height": 320,
+        "width": 580,
+        "color": 5
+      },
+      "id": "social-header-sticky",
+      "name": "Sticky Note Header",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        368,
+        240
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 📱 **SOCIAL MEDIA DIRECTOR WITH TEAM - AI WORKFLOW**\n\n**🔥 Powered by OpenAI O3 & GPT-4.1-mini Multi-Agent System**\n\n#SocialMedia #ContentCreation #n8nWorkflows #OpenAI #DigitalMarketing\n\n---\n\n### 📝 **Overview**\n\nThis multi-agent n8n automation creates a comprehensive social media powerhouse. A strategic Social Media Director agent receives your content requests, analyzes platform opportunities, and coordinates specialized agents for Instagram, Twitter/X, Facebook, TikTok, YouTube, and analytics—delivering engaging content across all major social platforms with maximum reach and engagement.\n\n---\n\n### ⚙️ **How It Works**\n\n1. **Chat trigger** receives social media requests (e.g., \"Create a viral campaign for our new product launch\")\n2. **Social Media Director** (O3) analyzes platform landscape and determines content strategy\n3. Delegates to specialist agents:\n   - Instagram Content Creator\n   - Twitter/X Strategist\n   - Facebook Community Manager\n   - TikTok Video Creator\n   - YouTube Content Planner\n   - Social Media Analytics Specialist\n4. Each agent uses **GPT-4.1-mini** for specialized content creation\n5. Results integrated into comprehensive social media campaign\n\n---\n\n### 👥 **Meet Your AI Social Media Team**\n\n| Agent | Purpose | Model | Output |\n|-------|---------|-------|--------|\n| 📱 **Social Media Director** | Strategy & campaign coordination | O3 | Strategic social leadership |\n| 📸 **Instagram Creator** | Visual content, stories, reels | GPT-4.1-mini | Instagram content |\n| 🐦 **Twitter/X Strategist** | Viral tweets, trending topics | GPT-4.1-mini | Twitter campaigns |\n| 👥 **Facebook Manager** | Community building, engagement | GPT-4.1-mini | Facebook strategies |\n| 🎵 **TikTok Creator** | Short-form video concepts | GPT-4.1-mini | TikTok content |\n| 🎬 **YouTube Planner** | Long-form video strategy | GPT-4.1-mini | YouTube campaigns |\n| 📊 **Analytics Specialist** | Performance tracking, insights | GPT-4.1-mini | Social analytics |\n\n---\n\n### 💡 **Use Cases**\n\n- **Viral Campaigns**: Multi-platform content strategies for maximum reach\n- **Product Launches**: Coordinated social media campaigns across all platforms\n- **Brand Awareness**: Consistent messaging and visual identity across platforms\n- **Community Building**: Engagement strategies and audience growth tactics\n- **Content Calendar**: Automated content planning and scheduling optimization\n- **Crisis Management**: Rapid response strategies for brand protection\n\n---\n\n### 💸 **Cost Optimization**\n\n- **O3 for Social Director**: Strategic social media decisions only\n- **GPT-4.1-mini for specialists**: 90% cost reduction\n- **Parallel processing**: All platforms handled simultaneously\n- **Content repurposing**: One strategy adapted for multiple platforms\n\n---\n\n### 🏷️ **Tags**\n\n#Instagram #TwitterX #Facebook #TikTok #YouTube #SocialMediaAnalytics\n#ContentStrategy #ViralMarketing #SocialEngagement #BrandAwareness #InfluencerMarketing\n#n8n #OpenAI #MultiAgentSystem #SocialAutomation #DigitalMarketing #ContentCreation",
+        "height": 2500,
+        "width": 740,
+        "color": 5
+      },
+      "id": "social-main-sticky",
+      "name": "Sticky Note Main",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        368,
+        576
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "model": "qwen2.5:7b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        2096,
+        800
+      ],
+      "id": "3d08bb55-c093-4ae8-963a-a331f808b938",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "CmjvgiZdYI8HpMIu",
+          "name": "Ollama account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Think": {
+      "ai_tool": [
+        [
+          "Social Media Director Agent",
+          "ai_tool",
+          0,
+          {
+            "node": "Social Media Director Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TikTok Video Creator": {
+      "ai_tool": [
+        [
+          "Social Media Director Agent",
+          "ai_tool",
+          0
+        ]
+      ]
+    },
+    "Twitter/X Strategist": {
+      "ai_tool": [
+        [
+          "Social Media Director Agent",
+          "ai_tool",
+          0
+        ]
+      ]
+    },
+    "YouTube Content Planner": {
+      "ai_tool": [
+        [
+          "Social Media Director Agent",
+          "ai_tool",
+          0
+        ]
+      ]
+    },
+    "Instagram Content Creator": {
+      "ai_tool": [
+        [
+          "Social Media Director Agent",
+          "ai_tool",
+          0
+        ]
+      ]
+    },
+    "Facebook Community Manager": {
+      "ai_tool": [
+        [
+          "Social Media Director Agent",
+          "ai_tool",
+          0
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          "Social Media Director Agent",
+          "main",
+          0,
+          {
+            "node": "Social Media Director Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Social Media Analytics Specialist": {
+      "ai_tool": [
+        [
+          "Social Media Director Agent",
+          "ai_tool",
+          0
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Social Media Director Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "YouTube Content Planner",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Instagram Content Creator",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Facebook Community Manager",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Twitter/X Strategist",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Social Media Analytics Specialist",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "TikTok Video Creator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ddeed115-ada9-4858-b154-bbd216e33142",
+  "meta": {
+    "templateId": "6915",
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1a78272c2439a7675eadcd563b0689769ea02281bea64a701b476f505db425fd"
+  },
+  "id": "cDdPZ8JEFp5HQUfH",
+  "tags": []
+}
