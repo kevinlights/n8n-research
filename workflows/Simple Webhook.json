@@ -1,0 +1,231 @@
+{
+  "name": "Simple Webhook",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "570ddb19-0936-44d5-9ec8-7d8e2bbff73b",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        160,
+        0
+      ],
+      "id": "4818073b-54be-4efd-b6de-7ea41fbf72a7",
+      "name": "Webhook",
+      "webhookId": "570ddb19-0936-44d5-9ec8-7d8e2bbff73b"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=获取用户输入，生成对应的 html 代码，使用 MUI 设计风格\n用户输入：{{ $json.query.query }}\n\n注意：\n直接输出 body 里面的部分代码\n不要生成 markdown，直接输出结果",
+        "hasOutputParser": true,
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        416,
+        0
+      ],
+      "id": "fa801fa9-dca7-454b-8384-84cff2e7f488",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "qwen2.5-coder:7b",
+          "mode": "list",
+          "cachedResultName": "qwen2.5-coder:7b"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        432,
+        224
+      ],
+      "id": "d423649b-ff92-4746-9ca9-50800ed25394",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "OCZO6HeNQoErAnaJ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.html }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html; charset=UTF-8"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1344,
+        0
+      ],
+      "id": "2ee90895-f563-4998-9cc4-a04c66e848bf",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"type\": {\n      \"type\": \"string\",\n      \"description\": \"The type of the UI component\",\n      \"enum\": [\n        \"div\",\n        \"span\",\n        \"a\",\n        \"p\",\n        \"h1\",\n        \"h2\",\n        \"h3\",\n        \"h4\",\n        \"h5\",\n        \"h6\",\n        \"ul\",\n        \"ol\",\n        \"li\",\n        \"img\",\n        \"button\",\n        \"input\",\n        \"textarea\",\n        \"select\",\n        \"option\",\n        \"label\",\n        \"form\",\n        \"table\",\n        \"thead\",\n        \"tbody\",\n        \"tr\",\n        \"th\",\n        \"td\",\n        \"nav\",\n        \"header\",\n        \"footer\",\n        \"section\",\n        \"article\",\n        \"aside\",\n        \"main\",\n        \"figure\",\n        \"figcaption\",\n        \"blockquote\",\n        \"q\",\n        \"hr\",\n        \"code\",\n        \"pre\",\n        \"iframe\",\n        \"video\",\n        \"audio\",\n        \"canvas\",\n        \"svg\",\n        \"path\",\n        \"circle\",\n        \"rect\",\n        \"line\",\n        \"polyline\",\n        \"polygon\",\n        \"g\",\n        \"use\",\n        \"symbol\"\n      ]\n    },\n    \"label\": {\n      \"type\": \"string\",\n      \"description\": \"The label of the UI component, used for buttons or form fields\"\n    },\n    \"children\": {\n      \"type\": \"array\",\n      \"description\": \"Nested UI components\",\n      \"items\": {\n        \"$ref\": \"#\"\n      }\n    },\n    \"attributes\": {\n      \"type\": \"array\",\n      \"description\": \"Arbitrary attributes for the UI component, suitable for any element using Tailwind framework\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"name\": {\n            \"type\": \"string\",\n            \"description\": \"The name of the attribute, for example onClick or className\"\n          },\n          \"value\": {\n            \"type\": \"string\",\n            \"description\": \"The value of the attribute using the Tailwind framework classes\"\n          }\n        },\n        \"additionalProperties\": false,\n        \"required\": [\n          \"name\",\n          \"value\"\n        ]\n      }\n    }\n  },\n  \"required\": [\n    \"type\",\n    \"label\",\n    \"children\",\n    \"attributes\"\n  ],\n  \"additionalProperties\": false\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        560,
+        224
+      ],
+      "id": "91753097-d35d-40fb-85e7-60c9442148fd",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "html": "<!DOCTYPE html>\n\n<html>\n<head>\n  <meta charset=\"UTF-8\" />\n  <meta name=\"viewport\" content=\"initial-scale=1, width=device-width\" />\n  <link rel=\"stylesheet\" href=\"https://cdn.muicss.com/mui-0.10.3/css/mui.min.css\">\n  <title>{{ $json.message.content.title }}</title>\n</head>\n<body>\n{{ $json.message.content.html }}\n</body>\n</html>"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        1120,
+        0
+      ],
+      "id": "556501a0-4956-4838-a6d2-c3f57285b165",
+      "name": "HTML"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "qwen2.5-coder:3b",
+          "mode": "id"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You convert a JSON to HTML. \nThe JSON output has the following fields:\n- html: the page HTML\n- title: the page title",
+              "role": "system"
+            },
+            {
+              "content": "={{ JSON.stringify($json.output) }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "90507ca9-7504-49d8-86dc-037b81a9a841",
+      "name": "OpenAI - JSON to HTML",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        768,
+        0
+      ],
+      "typeVersion": 1.3,
+      "credentials": {
+        "openAiApi": {
+          "id": "OCZO6HeNQoErAnaJ",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "OpenAI - JSON to HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI - JSON to HTML": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d0f4022a-d1e8-45d6-9bca-22b8a44247ce",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1a78272c2439a7675eadcd563b0689769ea02281bea64a701b476f505db425fd"
+  },
+  "id": "EGbheRNfTIrBROkd",
+  "tags": []
+}
